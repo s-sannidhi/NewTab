@@ -75,6 +75,9 @@
             if (input.startsWith('/c ') || input.endsWith(' /c')) {
                 const query = input.replace('/c ', '').replace(' /c', '');
                 window.location = `https://chat.openai.com/?q=${encodeURIComponent(query)}`;
+            } else if (input.startsWith('/y ') || input.endsWith(' /y')) {
+                const query = input.replace('/y ', '').replace(' /y', '');
+                window.location = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
             } else if (input.match(/^https?:\/\//) || input.includes('.')) {
                 window.location = input.startsWith('http') ? input : 'https://' + input;
             } else {
