@@ -34,10 +34,11 @@
 
 <div class="mt-6 w-2/3 md:w-1/3">
     <input
+            id="search-input"
             type="text"
-            placeholder="Search Google..."
+            placeholder="Search Google or enter a URL..."
             class="w-full px-4 py-3 rounded-lg text-white bg-gray-900 focus:outline-none border border-gray-700 text-lg font-medium"
-            onkeydown="if(event.key==='Enter') window.location='https://www.google.com/search?q='+this.value;"
+            onkeydown="handleInput(event)"
     >
 </div>
 
@@ -66,6 +67,21 @@
             "opacity": { "value": 0.3 }
         }
     });
+
+    function handleInput(event) {
+        if (event.key === 'Enter') {
+            const input = document.getElementById('search-input').value.trim();
+
+            if (input.startsWith('/c ') || input.endsWith(' /c')) {
+                const query = input.replace('/c ', '').replace(' /c', '');
+                window.location = `https://chat.openai.com/?q=${encodeURIComponent(query)}`;
+            } else if (input.match(/^https?:\/\//) || input.includes('.')) {
+                window.location = input.startsWith('http') ? input : 'https://' + input;
+            } else {
+                window.location = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+            }
+        }
+    }
 </script>
 </body>
 </html>
