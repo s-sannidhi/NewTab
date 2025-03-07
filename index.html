@@ -25,6 +25,38 @@
         input::placeholder {
             color: rgba(255, 255, 255, 0.6);
         }
+
+        /* Styling for autocomplete suggestions */
+        #search-suggestions {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-top: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background-color: #2a2a2a;
+        }
+
+        .suggestion-item i {
+            margin-right: 10px;
+            opacity: 0.7;
+        }
+
+        .suggestion-category {
+            font-size: 0.8em;
+            color: #666;
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center h-screen text-white bg-black">
@@ -32,14 +64,16 @@
 <h1 class="text-5xl md:text-7xl font-bold text-white mb-4">Hi, Srujan</h1>
 <p id="clock" class="text-2xl mt-2 font-semibold text-gray-300"></p>
 
-<div class="mt-6 w-2/3 md:w-1/3">
+<div class="mt-6 w-2/3 md:w-1/3 relative">
     <input
             id="search-input"
             type="text"
             placeholder="Search Google or enter a URL..."
             class="w-full px-4 py-3 rounded-lg text-white bg-gray-900 focus:outline-none border border-gray-700 text-lg font-medium"
             onkeydown="handleInput(event)"
+            oninput="getSuggestions(event)"
     >
+    <div id="search-suggestions" class="absolute w-full"></div>
 </div>
 
 <div class="mt-6 flex space-x-6 text-lg">
@@ -68,23 +102,268 @@
         }
     });
 
-    function handleInput(event) {
-        if (event.key === 'Enter') {
-            const input = document.getElementById('search-input').value.trim();
+    // Store recent searches in localStorage
+    const RECENT_SEARCHES_KEY = 'recentSearches';
+    const MAX_RECENT_SEARCHES = 5;
 
-            if (input.startsWith('/c ') || input.endsWith(' /c')) {
-                const query = input.replace('/c ', '').replace(' /c', '');
-                window.location = `https://chat.openai.com/?q=${encodeURIComponent(query)}`;
-            } else if (input.startsWith('/y ') || input.endsWith(' /y')) {
-                const query = input.replace('/y ', '').replace(' /y', '');
+    function getRecentSearches() {
+        return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]');
+    }
+
+    function addToRecentSearches(query) {
+        const searches = getRecentSearches();
+        const newSearches = [query, ...searches.filter(s => s !== query)].slice(0, MAX_RECENT_SEARCHES);
+        localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(newSearches));
+    }
+
+    const CUSTOM_SHORTCUTS = {
+        '/c': { name: 'ChatGPT', url: 'https://chat.openai.com', description: 'Search or start a new chat' },
+        '/y': { name: 'YouTube', url: 'https://youtube.com', description: 'Search for videos' },
+        '/g': { name: 'GitHub', url: 'https://github.com', description: 'Search repositories' },
+        '/m': { name: 'Gmail', url: 'https://mail.google.com', description: 'Search emails' },
+        '/d': { name: 'Google Drive', url: 'https://drive.google.com', description: 'Search files' },
+    };
+
+    let debounceTimer;
+    
+    async function getSuggestions(event) {
+        const input = event.target.value.trim();
+        const suggestionsDiv = document.getElementById('search-suggestions');
+        
+        if (input.length < 1) {
+            suggestionsDiv.style.display = 'none';
+            return;
+        }
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            let suggestions = [];
+            const slashCommand = input.split(' ')[0];
+
+            if (input.startsWith('/')) {
+                if (!input.includes(' ')) {
+                    // Show command suggestions
+                    suggestions = Object.entries(CUSTOM_SHORTCUTS)
+                        .filter(([key]) => key.startsWith(input))
+                        .map(([key, value]) => ({
+                            text: `${key} - ${value.name}`,
+                            type: 'Shortcut',
+                            icon: getIconForCommand(key),
+                            value: key + ' ',  // Add space to make it ready for search
+                            description: value.description
+                        }));
+                }
+            } else {
+                // Only show history suggestions
+                const recentSearches = getRecentSearches()
+                    .filter(search => search.toLowerCase().includes(input.toLowerCase()))
+                    .map(search => ({
+                        text: search,
+                        type: 'History',
+                        icon: 'fa-solid fa-clock-rotate-left',
+                        value: search,
+                        description: 'From your search history'
+                    }));
+
+                suggestions.push(...recentSearches);
+            }
+
+            if (suggestions.length > 0) {
+                suggestionsDiv.innerHTML = suggestions
+                    .map(suggestion => `
+                        <div class="suggestion-item flex items-center px-4 py-3" 
+                             data-value="${suggestion.value.replace(/"/g, '&quot;')}"
+                             onclick="selectSuggestion('${suggestion.value.replace(/'/g, "\\'")}')">
+                            <div class="flex items-center flex-1">
+                                <i class="${suggestion.icon} text-gray-400 w-6"></i>
+                                <div class="flex flex-col ml-3">
+                                    <span class="text-white text-base">${suggestion.text}</span>
+                                    <span class="text-xs text-gray-500 mt-0.5">${suggestion.description}</span>
+                                </div>
+                            </div>
+                            <span class="suggestion-category text-xs px-2 py-1 rounded bg-gray-800 ml-4">${suggestion.type}</span>
+                        </div>
+                    `)
+                    .join('');
+                suggestionsDiv.style.display = 'block';
+            } else {
+                suggestionsDiv.style.display = 'none';
+            }
+        }, 150);
+    }
+
+    function getIconForCommand(command) {
+        const iconMap = {
+            '/y': 'fa-brands fa-youtube',
+            '/c': 'fa-solid fa-robot',
+            '/g': 'fa-brands fa-github',
+            '/m': 'fa-solid fa-envelope',
+            '/d': 'fa-brands fa-google-drive'
+        };
+        return iconMap[command] || 'fa-solid fa-bolt';
+    }
+
+    // Update styles for suggestions
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        .suggestion-item {
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #2a2a2a;
+            outline: none;
+        }
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        .suggestion-item:hover, .suggestion-item:focus {
+            background-color: #2a2a2a;
+        }
+        .suggestion-category {
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+        }
+        #search-suggestions {
+            margin-top: 8px;
+            border: 1px solid #333;
+            border-radius: 12px;
+            background-color: #1a1a1a;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-height: min(400px, 80vh);
+            position: absolute;
+            width: 100%;
+            z-index: 50;
+        }
+    `;
+    document.head.appendChild(styleSheet);
+
+    let currentFocusIndex = -1;
+
+    function handleInput(event) {
+        const suggestionsDiv = document.getElementById('search-suggestions');
+        const suggestions = Array.from(suggestionsDiv.querySelectorAll('.suggestion-item'));
+        const searchInput = document.getElementById('search-input');
+        
+        switch (event.key) {
+            case 'ArrowDown':
+                event.preventDefault();
+                if (suggestionsDiv.style.display === 'block') {
+                    currentFocusIndex = (currentFocusIndex + 1) % suggestions.length;
+                    updateFocus(suggestions);
+                }
+                break;
+                
+            case 'ArrowUp':
+                event.preventDefault();
+                if (suggestionsDiv.style.display === 'block') {
+                    currentFocusIndex = currentFocusIndex <= 0 ? suggestions.length - 1 : currentFocusIndex - 1;
+                    updateFocus(suggestions);
+                }
+                break;
+                
+            case 'Enter':
+                if (currentFocusIndex >= 0 && suggestions[currentFocusIndex]) {
+                    event.preventDefault();
+                    const suggestion = suggestions[currentFocusIndex].getAttribute('data-value');
+                    selectSuggestion(suggestion);
+                    handleSearch(suggestion);
+                } else {
+                    const input = searchInput.value.trim();
+                    suggestionsDiv.style.display = 'none';
+                    handleSearch(input);
+                }
+                currentFocusIndex = -1;
+                break;
+                
+            case 'Escape':
+                suggestionsDiv.style.display = 'none';
+                searchInput.blur();
+                currentFocusIndex = -1;
+                break;
+
+            case 'Tab':
+                if (suggestionsDiv.style.display === 'block') {
+                    event.preventDefault();
+                    if (event.shiftKey) {
+                        currentFocusIndex = currentFocusIndex <= 0 ? suggestions.length - 1 : currentFocusIndex - 1;
+                    } else {
+                        currentFocusIndex = (currentFocusIndex + 1) % suggestions.length;
+                    }
+                    updateFocus(suggestions);
+                }
+                break;
+        }
+    }
+
+    function updateFocus(suggestions) {
+        suggestions.forEach((item, index) => {
+            if (index === currentFocusIndex) {
+                item.classList.add('bg-gray-800');
+                item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            } else {
+                item.classList.remove('bg-gray-800');
+            }
+        });
+    }
+
+    function selectSuggestion(suggestion) {
+        const searchInput = document.getElementById('search-input');
+        searchInput.value = suggestion;
+        document.getElementById('search-suggestions').style.display = 'none';
+        searchInput.focus();
+    }
+
+    function handleSearch(input) {
+        const slashCommand = input.split(' ')[0];
+        const query = input.slice(slashCommand.length + 1);
+
+        if (input.startsWith('/') && CUSTOM_SHORTCUTS[slashCommand]) {
+            const shortcut = CUSTOM_SHORTCUTS[slashCommand];
+            if (query.trim()) {
+                // If there's a query after the command, search on that platform
+                switch(slashCommand) {
+                    case '/y':
                 window.location = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-            } else if (input.match(/^https?:\/\//) || input.includes('.')) {
+                        break;
+                    case '/g':
+                        window.location = `https://github.com/search?q=${encodeURIComponent(query)}`;
+                        break;
+                    case '/c':
+                        window.location = `https://chat.openai.com/chat?q=${encodeURIComponent(query)}`;
+                        break;
+                    case '/m':
+                        window.location = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`;
+                        break;
+                    case '/d':
+                        window.location = `https://drive.google.com/drive/search?q=${encodeURIComponent(query)}`;
+                        break;
+                }
+            } else {
+                // If just the command, go to the main URL
+                window.location = shortcut.url;
+            }
+        } else {
+            if (!input.startsWith('/')) {
+                addToRecentSearches(input);
+            }
+
+            if (input.match(/^https?:\/\//) || input.includes('.')) {
                 window.location = input.startsWith('http') ? input : 'https://' + input;
             } else {
                 window.location = `https://www.google.com/search?q=${encodeURIComponent(input)}`;
             }
         }
     }
+
+    // Update click outside handler to reset focus
+    document.addEventListener('click', (event) => {
+        const suggestionsDiv = document.getElementById('search-suggestions');
+        const searchInput = document.getElementById('search-input');
+        
+        if (!searchInput.contains(event.target) && !suggestionsDiv.contains(event.target)) {
+            suggestionsDiv.style.display = 'none';
+            currentFocusIndex = -1;
+        }
+    });
 </script>
 </body>
 </html>
