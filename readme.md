@@ -1,18 +1,25 @@
-# NewTab - Custom New Tab Page
+# NewTab
 
 ## Overview
 
-This project features a static custom new tab page I created for personal use. It is designed to offer a clean and minimalistic layout, providing quick access to the websites and resources I often use.
+This project features a static custom new tab page that I created for my personal use. It is designed to offer a clean and minimalistic layout, providing quick access to the websites and resources I use most often.
 
 ## Features
 
 - Static, simple design
 - Quick links to frequently visited sites
-- Personalized for my needs
+- Supports `/` commands for quick searches
+
+## `/` Commands
+
+The new tab includes special commands to quickly search specific platforms:
+
+- `/y <query>` or `<query> /y` – Searches YouTube
+- `/c <query>` or `<query> /c` – Searches ChatGPT
 
 ## Installation
 
-Follow the instructions in the repository to use it as your new tab page.
+Simply add the filepath of the saved index.html page to your default new tab within your browser settings
 
 ## License
 
