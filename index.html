@@ -62,7 +62,7 @@
 </head>
 <body class="flex flex-col items-center justify-center h-screen text-white">
 <div id="particles-js"></div>
-<h1 class="text-5xl md:text-7xl font-bold text-white mb-4">Hi, Srujan</h1>
+<h1 id="greeting" class="text-5xl md:text-7xl font-bold text-white mb-4"></h1>
 <p id="clock" class="text-2xl mt-2 font-semibold text-orange-400"></p>
 
 <div class="mt-6 w-2/3 md:w-1/3 relative">
@@ -92,6 +92,22 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
+
+    function updateGreeting() {
+        const now = new Date();
+        const hour = now.getHours();
+        let greeting = '';
+        if (hour < 12) {
+            greeting = 'Good morning, Srujan';
+        } else if (hour < 18) {
+            greeting = 'Good afternoon, Srujan';
+        } else {
+            greeting = 'Good evening, Srujan';
+        }
+        document.getElementById('greeting').textContent = greeting;
+    }
+    setInterval(updateGreeting, 60 * 1000);
+    updateGreeting();
 
     particlesJS("particles-js", {
         "particles": {
