@@ -8,86 +8,669 @@
     <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" crossorigin="anonymous"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;700&family=Space+Grotesk:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-        #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            z-index: -1;
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --text-accent: #ff6b35;
+            --text-muted: #666666;
+            --border-color: #333333;
+            --hover-color: #1a1a1a;
+            --glow-color: rgba(255, 107, 53, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Space Grotesk', sans-serif;
-            background-color: #000000;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
 
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Styling for autocomplete suggestions */
-        #search-suggestions {
-            background-color: #111111;
-            border: 1px solid #222222;
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .greeting-container {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .greeting-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        #greeting {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        #clock {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1rem, 3vw, 1.4rem);
+            font-weight: 500;
+            color: var(--text-accent);
+            opacity: 0.9;
+            letter-spacing: 0.1em;
+        }
+
+        .search-container {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 4rem;
+            animation: fadeIn 1s ease-out 0.2s both;
+        }
+
+        .search-wrapper {
+            position: relative;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            margin-top: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .search-wrapper:focus-within {
+            border-color: var(--text-accent);
+            box-shadow: 0 0 0 3px var(--glow-color);
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: 7px;
+        }
+
+        #search-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .shortcuts-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 1s ease-out 0.4s both;
+        }
+
+        .shortcut-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shortcut-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .shortcut-item:hover::before {
+            left: 100%;
+        }
+
+        .shortcut-item:hover {
+            border-color: var(--text-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.1);
+        }
+
+        .shortcut-icon {
+            font-size: 1.5rem;
+            color: var(--text-accent);
+            transition: all 0.3s ease;
+        }
+
+        .shortcut-item:hover .shortcut-icon {
+            transform: scale(1.1);
+        }
+
+        .shortcut-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Enhanced suggestions styling */
+        #search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
             max-height: 300px;
             overflow-y: auto;
             display: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
         }
 
         .suggestion-item {
-            padding: 10px;
+            padding: 0.75rem 1rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
         }
 
         .suggestion-item:hover, .suggestion-item:focus {
-            background-color: #222222;
+            background: var(--hover-color);
         }
 
-        .suggestion-item i {
-            margin-right: 10px;
-            opacity: 0.7;
+        .suggestion-item.selected {
+            background: var(--hover-color);
+            border-left: 3px solid var(--text-accent);
+        }
+
+        .suggestion-icon {
+            font-size: 1rem;
+            color: var(--text-accent);
+            width: 20px;
+            text-align: center;
+        }
+
+        .suggestion-content {
+            flex: 1;
+        }
+
+        .suggestion-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .suggestion-description {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .suggestion-category {
-            font-size: 0.8em;
-            color: #ff8c00;
-            margin-left: 8px;
+            background: var(--text-accent);
+            color: var(--bg-primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typewriter {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid var(--text-accent);
+            white-space: nowrap;
+            animation: typewriter 3s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--text-accent) }
+        }
+
+        /* Scrollbar styling */
+        #search-suggestions::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #search-suggestions::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+            border-radius: 2px;
+        }
+
+        #search-suggestions::-webkit-scrollbar-thumb {
+            background: var(--text-accent);
+            border-radius: 2px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1.5rem 1rem;
+            }
+            
+            .greeting-container {
+                margin-bottom: 3rem;
+            }
+            
+            .search-container {
+                margin-bottom: 3rem;
+            }
+            
+            .shortcuts-container {
+                gap: 0.75rem;
+                max-width: 100%;
+            }
+            
+            .shortcut-item {
+                padding: 1rem 0.75rem;
+                min-width: 80px;
+            }
+            
+            .shortcut-icon {
+                font-size: 1.25rem;
+            }
+            
+            .shortcut-label {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 1rem 0.75rem;
+                justify-content: flex-start;
+                padding-top: 15vh;
+            }
+            
+            .greeting-container {
+                margin-bottom: 2.5rem;
+            }
+            
+            .greeting-label {
+                font-size: 0.8rem;
+            }
+            
+            #greeting {
+                font-size: clamp(1.8rem, 8vw, 2.5rem);
+                margin-bottom: 0.75rem;
+            }
+            
+            #clock {
+                font-size: clamp(0.9rem, 4vw, 1.2rem);
+            }
+            
+            .search-container {
+                margin-bottom: 2.5rem;
+                max-width: 100%;
+            }
+            
+            .search-wrapper {
+                border-radius: 12px;
+            }
+            
+            #search-input {
+                padding: 1.2rem 1.5rem;
+                font-size: 1.1rem;
+                border-radius: 10px;
+            }
+            
+            .shortcuts-container {
+                gap: 0.75rem;
+                justify-content: center;
+                max-width: 100%;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .shortcut-item {
+                padding: 1.2rem 0.5rem;
+                border-radius: 12px;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .shortcut-icon {
+                font-size: 1.4rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .shortcut-label {
+                font-size: 0.65rem;
+                line-height: 1.2;
+            }
+            
+            /* Mobile-specific particle adjustments */
+            #particles-js {
+                opacity: 0.7;
+            }
+            
+            /* Mobile-friendly suggestions */
+            #search-suggestions {
+                border-radius: 12px;
+                max-height: 250px;
+            }
+            
+            .suggestion-item {
+                padding: 1rem 1.25rem;
+                min-height: 60px;
+            }
+            
+            .suggestion-icon {
+                font-size: 1.1rem;
+                width: 24px;
+            }
+            
+            .suggestion-text {
+                font-size: 1rem;
+            }
+            
+            .suggestion-description {
+                font-size: 0.8rem;
+            }
+            
+            .suggestion-category {
+                font-size: 0.6rem;
+                padding: 0.25rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .main-container {
+                padding: 0.75rem 0.5rem;
+                padding-top: 12vh;
+            }
+            
+            .greeting-container {
+                margin-bottom: 2rem;
+            }
+            
+            .search-container {
+                margin-bottom: 2rem;
+            }
+            
+            .shortcuts-container {
+                gap: 0.5rem;
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .shortcut-item {
+                padding: 1rem 0.25rem;
+                width: 100%;
+            }
+            
+            .shortcut-icon {
+                font-size: 1.2rem;
+            }
+            
+            .shortcut-label {
+                font-size: 0.6rem;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .shortcut-item {
+                transition: all 0.2s ease;
+            }
+            
+            .shortcut-item:active {
+                transform: scale(0.95);
+                background: var(--hover-color);
+            }
+            
+            .suggestion-item {
+                min-height: 56px;
+                padding: 1rem 1.25rem;
+            }
+            
+            #search-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Terminal-style cursor effect */
+        .terminal-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: var(--text-accent);
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center h-screen text-white">
-<div id="particles-js"></div>
-<h1 id="greeting" class="text-5xl md:text-7xl font-bold text-white mb-4"></h1>
-<p id="clock" class="text-2xl mt-2 font-semibold text-orange-400"></p>
+<body>
+    <div id="particles-js"></div>
+    
+    <div class="main-container">
+        <div class="greeting-container">
+            <div class="greeting-label mono">// current time</div>
+            <h1 id="greeting"></h1>
+            <p id="clock"></p>
+        </div>
 
-<div class="mt-6 w-2/3 md:w-1/3 relative">
-    <input
-            id="search-input"
-            type="text"
-            placeholder="Search Google or enter a URL..."
-            class="w-full px-4 py-3 rounded-lg text-white bg-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-500 border border-gray-700 text-lg font-medium"
-            onkeydown="handleInput(event)"
-            oninput="getSuggestions(event)"
-    >
-    <div id="search-suggestions" class="absolute w-full"></div>
-</div>
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input
+                    id="search-input"
+                    type="text"
+                    placeholder="Search the web or enter a URL..."
+                    onkeydown="handleInput(event)"
+                    oninput="getSuggestions(event)"
+                >
+                <div id="search-suggestions"></div>
+            </div>
+        </div>
 
-<div class="mt-6 flex space-x-6 text-lg">
-    <a href="https://mail.google.com" class="hover:text-orange-400"><i class="fa-solid fa-envelope text-3xl"></i></a>
-    <a href="https://www.youtube.com" class="hover:text-orange-400"><i class="fa-brands fa-youtube text-3xl"></i></a>
-    <a href="https://drive.google.com" class="hover:text-orange-400"><i class="fa-brands fa-google-drive text-3xl"></i></a>
-    <a href="https://github.com" class="hover:text-orange-400"><i class="fa-brands fa-github text-3xl"></i></a>
-</div>
+        <div class="shortcuts-container">
+            <a href="https://mail.google.com" class="shortcut-item">
+                <i class="fa-solid fa-envelope shortcut-icon"></i>
+                <span class="shortcut-label">gmail</span>
+            </a>
+            <a href="https://www.youtube.com" class="shortcut-item">
+                <i class="fa-brands fa-youtube shortcut-icon"></i>
+                <span class="shortcut-label">youtube</span>
+            </a>
+            <a href="https://drive.google.com" class="shortcut-item">
+                <i class="fa-brands fa-google-drive shortcut-icon"></i>
+                <span class="shortcut-label">drive</span>
+            </a>
+            <a href="https://github.com" class="shortcut-item">
+                <i class="fa-brands fa-github shortcut-icon"></i>
+                <span class="shortcut-label">github</span>
+            </a>
+            <a href="https://chat.openai.com" class="shortcut-item">
+                <i class="fa-solid fa-robot shortcut-icon"></i>
+                <span class="shortcut-label">chatgpt</span>
+            </a>
+            <a href="https://calendar.google.com" class="shortcut-item">
+                <i class="fa-solid fa-calendar shortcut-icon"></i>
+                <span class="shortcut-label">calendar</span>
+            </a>
+        </div>
+    </div>
 
 <script>
+    // Enhanced particle configuration
+    particlesJS("particles-js", {
+        "particles": {
+            "number": {
+                "value": 80,
+                "density": {
+                    "enable": true,
+                    "value_area": 800
+                }
+            },
+            "color": {
+                "value": "#ff6b35"
+            },
+            "shape": {
+                "type": "circle",
+                "stroke": {
+                    "width": 0,
+                    "color": "#000000"
+                }
+            },
+            "opacity": {
+                "value": 0.4,
+                "random": true,
+                "anim": {
+                    "enable": true,
+                    "speed": 1,
+                    "opacity_min": 0.2,
+                    "sync": false
+                }
+            },
+            "size": {
+                "value": 2,
+                "random": true,
+                "anim": {
+                    "enable": true,
+                    "speed": 2,
+                    "size_min": 0.5,
+                    "sync": false
+                }
+            },
+            "line_linked": {
+                "enable": true,
+                "distance": 150,
+                "color": "#ff6b35",
+                "opacity": 0.2,
+                "width": 1
+            },
+            "move": {
+                "enable": true,
+                "speed": 0.8,
+                "direction": "none",
+                "random": true,
+                "straight": false,
+                "out_mode": "out",
+                "bounce": false,
+                "attract": {
+                    "enable": true,
+                    "rotateX": 600,
+                    "rotateY": 1200
+                }
+            }
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+                "onhover": {
+                    "enable": true,
+                    "mode": "grab"
+                },
+                "onclick": {
+                    "enable": false,
+                    "mode": "push"
+                },
+                "resize": true
+            },
+            "modes": {
+                "grab": {
+                    "distance": 140,
+                    "line_linked": {
+                        "opacity": 0.3
+                    }
+                }
+            }
+        },
+        "retina_detect": true
+    });
+
     function updateClock() {
         const now = new Date();
-        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const timeString = now.toLocaleTimeString([], { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+        });
         document.getElementById('clock').textContent = timeString;
     }
     setInterval(updateClock, 1000);
@@ -108,16 +691,6 @@
     }
     setInterval(updateGreeting, 60 * 1000);
     updateGreeting();
-
-    particlesJS("particles-js", {
-        "particles": {
-            "number": { "value": 80 },
-            "size": { "value": 2 },
-            "color": { "value": "#ff8c00" },
-            "line_linked": { "enable": true, "color": "#ff8c00" },
-            "opacity": { "value": 0.3 }
-        }
-    });
 
     // Store recent searches in localStorage
     const RECENT_SEARCHES_KEY = 'recentSearches';
@@ -142,6 +715,7 @@
     };
 
     let debounceTimer;
+    let currentFocusIndex = -1;
     
     async function getSuggestions(event) {
         const input = event.target.value.trim();
@@ -166,12 +740,12 @@
                             text: `${key} - ${value.name}`,
                             type: 'Shortcut',
                             icon: getIconForCommand(key),
-                            value: key + ' ',  // Add space to make it ready for search
+                            value: key + ' ',
                             description: value.description
                         }));
                 }
             } else {
-                // Only show history suggestions
+                // Show history suggestions
                 const recentSearches = getRecentSearches()
                     .filter(search => search.toLowerCase().includes(input.toLowerCase()))
                     .map(search => ({
@@ -188,17 +762,15 @@
             if (suggestions.length > 0) {
                 suggestionsDiv.innerHTML = suggestions
                     .map(suggestion => `
-                        <div class="suggestion-item flex items-center px-4 py-3" 
+                        <div class="suggestion-item" 
                              data-value="${suggestion.value.replace(/"/g, '&quot;')}"
                              onclick="selectSuggestion('${suggestion.value.replace(/'/g, "\\'")}')">
-                            <div class="flex items-center flex-1">
-                                <i class="${suggestion.icon} text-gray-400 w-6"></i>
-                                <div class="flex flex-col ml-3">
-                                    <span class="text-white text-base">${suggestion.text}</span>
-                                    <span class="text-xs text-gray-500 mt-0.5">${suggestion.description}</span>
-                                </div>
+                            <i class="${suggestion.icon} suggestion-icon"></i>
+                            <div class="suggestion-content">
+                                <div class="suggestion-text">${suggestion.text}</div>
+                                <div class="suggestion-description">${suggestion.description}</div>
                             </div>
-                            <span class="suggestion-category text-xs px-2 py-1 rounded bg-gray-800 ml-4">${suggestion.type}</span>
+                            <span class="suggestion-category">${suggestion.type}</span>
                         </div>
                     `)
                     .join('');
@@ -219,48 +791,6 @@
         };
         return iconMap[command] || 'fa-solid fa-bolt';
     }
-
-    // Update styles for suggestions
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-        .suggestion-item {
-            transition: all 0.2s;
-            border-bottom: 1px solid #222222;
-            outline: none;
-        }
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-        .suggestion-item:hover, .suggestion-item:focus {
-            background-color: #222222;
-        }
-        .suggestion-category {
-            font-size: 0.7rem;
-            letter-spacing: 0.05em;
-            color: #ff8c00;
-        }
-        #search-suggestions {
-            margin-top: 8px;
-            border: 1px solid #222222;
-            border-radius: 12px;
-            background-color: #111111;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            max-height: min(400px, 80vh);
-            position: absolute;
-            width: 100%;
-            z-index: 50;
-        }
-        .suggestion-item.bg-gray-800 {
-            background-color: #222222 !important;
-        }
-        .text-gray-500 {
-            color: #ff8c00 !important;
-        }
-    `;
-    document.head.appendChild(styleSheet);
-
-    let currentFocusIndex = -1;
 
     function handleInput(event) {
         const suggestionsDiv = document.getElementById('search-suggestions');
@@ -321,10 +851,10 @@
     function updateFocus(suggestions) {
         suggestions.forEach((item, index) => {
             if (index === currentFocusIndex) {
-                item.classList.add('bg-gray-800');
+                item.classList.add('selected');
                 item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             } else {
-                item.classList.remove('bg-gray-800');
+                item.classList.remove('selected');
             }
         });
     }
@@ -346,7 +876,7 @@
                 // If there's a query after the command, search on that platform
                 switch(slashCommand) {
                     case '/y':
-                window.location = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+                        window.location = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
                         break;
                     case '/g':
                         window.location = `https://github.com/search?q=${encodeURIComponent(query)}`;
@@ -387,6 +917,20 @@
             suggestionsDiv.style.display = 'none';
             currentFocusIndex = -1;
         }
+    });
+
+    // Add subtle hover effects
+    document.addEventListener('DOMContentLoaded', function() {
+        const shortcuts = document.querySelectorAll('.shortcut-item');
+        shortcuts.forEach(shortcut => {
+            shortcut.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            shortcut.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
     });
 </script>
 </body>
