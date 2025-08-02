@@ -529,10 +529,148 @@
             0%, 50% { opacity: 1; }
             51%, 100% { opacity: 0; }
         }
+
+        /* Color picker styles */
+        .color-picker {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .color-picker:hover {
+            border-color: var(--text-accent);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .color-picker-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.05em;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+            border-color: var(--text-primary);
+        }
+
+        .color-option.active {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px var(--text-accent);
+        }
+
+        .color-option::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .color-option.active::before {
+            opacity: 1;
+        }
+
+        /* Color scheme definitions */
+        .color-orange { background: #ff6b35; }
+        .color-nord { background: #5e81ac; }
+        .color-everforest { background: #a7c080; }
+        .color-catppuccin { background: #d4a6d8; }
+
+        /* Mobile responsive color picker */
+        @media (max-width: 768px) {
+            .color-picker {
+                top: 10px;
+                right: 10px;
+                padding: 0.75rem;
+            }
+            
+            .color-option {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .color-option::before {
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .color-picker {
+                top: 5px;
+                right: 5px;
+                padding: 0.5rem;
+            }
+            
+            .color-picker-title {
+                font-size: 0.7rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .color-options {
+                gap: 0.4rem;
+            }
+            
+            .color-option {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .color-option::before {
+                width: 10px;
+                height: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="particles-js"></div>
+    
+    <!-- Color Picker -->
+    <div class="color-picker">
+        <div class="color-picker-title">// theme</div>
+        <div class="color-options">
+            <div class="color-option color-orange active" data-color="#ff6b35" onclick="changeAccentColor('#ff6b35', this)"></div>
+            <div class="color-option color-nord" data-color="#5e81ac" onclick="changeAccentColor('#5e81ac', this)"></div>
+            <div class="color-option color-everforest" data-color="#a7c080" onclick="changeAccentColor('#a7c080', this)"></div>
+            <div class="color-option color-catppuccin" data-color="#d4a6d8" onclick="changeAccentColor('#d4a6d8', this)"></div>
+        </div>
+    </div>
     
     <div class="main-container">
         <div class="greeting-container">
@@ -925,8 +1063,111 @@
         }
     });
 
+    // Color picker functionality
+    function changeAccentColor(color, element) {
+        // Update CSS custom properties
+        document.documentElement.style.setProperty('--text-accent', color);
+        
+        // Calculate glow color with opacity
+        const glowColor = color + '1a'; // 10% opacity in hex
+        document.documentElement.style.setProperty('--glow-color', glowColor);
+        
+        // Update particle colors
+        if (window.pJSDom && window.pJSDom[0]) {
+            const particles = window.pJSDom[0].pJS.particles;
+            particles.color.value = color;
+            particles.line_linked.color = color;
+            window.pJSDom[0].pJS.fn.particlesRefresh();
+        }
+        
+        // Update clock text color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = color;
+        }
+        
+        // Update shortcut icons color
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.color = color;
+        });
+        
+        // Update suggestion icons color
+        const suggestionIcons = document.querySelectorAll('.suggestion-icon');
+        suggestionIcons.forEach(icon => {
+            icon.style.color = color;
+        });
+        
+        // Update suggestion categories background
+        const suggestionCategories = document.querySelectorAll('.suggestion-category');
+        suggestionCategories.forEach(category => {
+            category.style.background = color;
+        });
+        
+        // Update active state
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        element.classList.add('active');
+        
+        // Save preference to localStorage
+        localStorage.setItem('accentColor', color);
+    }
+
+    // Load saved color preference
+    function loadSavedColor() {
+        const savedColor = localStorage.getItem('accentColor');
+        if (savedColor) {
+            const colorOption = document.querySelector(`[data-color="${savedColor}"]`);
+            if (colorOption) {
+                changeAccentColor(savedColor, colorOption);
+            }
+        } else {
+            // Set default to orange if no saved color
+            const defaultColor = '#ff6b35';
+            const defaultOption = document.querySelector(`[data-color="${defaultColor}"]`);
+            if (defaultOption) {
+                changeAccentColor(defaultColor, defaultOption);
+            }
+        }
+    }
+
+    // Initialize color on page load
+    function initializeColor() {
+        const savedColor = localStorage.getItem('accentColor') || '#ff6b35';
+        
+        // Update CSS custom properties immediately
+        document.documentElement.style.setProperty('--text-accent', savedColor);
+        const glowColor = savedColor + '1a';
+        document.documentElement.style.setProperty('--glow-color', glowColor);
+        
+        // Update all elements that use the accent color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = savedColor;
+        }
+        
+        // Force update shortcut icons with inline styles
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.setProperty('color', savedColor, 'important');
+        });
+        
+        // Set the active state in color picker
+        const colorOption = document.querySelector(`[data-color="${savedColor}"]`);
+        if (colorOption) {
+            colorOption.classList.add('active');
+        }
+    }
+
+    // Initialize color as soon as possible
+    initializeColor();
+    
     // Add subtle hover effects
     document.addEventListener('DOMContentLoaded', function() {
+        // Load saved color preference (for particles and other elements)
+        loadSavedColor();
+        
         const shortcuts = document.querySelectorAll('.shortcut-item');
         shortcuts.forEach(shortcut => {
             shortcut.addEventListener('mouseenter', function() {
