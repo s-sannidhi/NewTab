@@ -15,7 +15,7 @@ This project features a static custom new tab page that I created for my persona
 The new tab includes special commands to quickly search specific platforms:
 
 - `/y <query>` or `<query> /y` – Searches YouTube
-- `/c <query>` or `<query> /c` – Searches ChatGPT
+- `/c <query>` or `<query> /c` – Searches Anthropic Claude
 
 ## Installation
 

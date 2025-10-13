@@ -128,7 +128,7 @@ function addToRecentSearches(query) {
 }
 
 const CUSTOM_SHORTCUTS = {
-    '/c': { name: 'ChatGPT', url: 'https://chat.openai.com', description: 'Search or start a new chat' },
+    '/c': { name: 'Claude', url: 'https://claude.ai', description: 'Search or start a new chat' },
     '/y': { name: 'YouTube', url: 'https://youtube.com', description: 'Search for videos' },
     '/g': { name: 'GitHub', url: 'https://github.com', description: 'Search repositories' },
     '/m': { name: 'Gmail', url: 'https://mail.google.com', description: 'Search emails' },
@@ -205,7 +205,7 @@ async function getSuggestions(event) {
 function getIconForCommand(command) {
     const iconMap = {
         '/y': 'fa-brands fa-youtube',
-        '/c': 'fa-solid fa-robot',
+        '/c': 'fa-solid fa-brain',
         '/g': 'fa-brands fa-github',
         '/m': 'fa-solid fa-envelope',
         '/d': 'fa-brands fa-google-drive'
@@ -303,7 +303,7 @@ function handleSearch(input) {
                     window.location = `https://github.com/search?q=${encodeURIComponent(query)}`;
                     break;
                 case '/c':
-                    window.location = `https://chat.openai.com/chat?q=${encodeURIComponent(query)}`;
+                    window.location = `https://claude.ai/chat?q=${encodeURIComponent(query)}`;
                     break;
                 case '/m':
                     window.location = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`;
