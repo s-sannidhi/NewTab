@@ -128,7 +128,7 @@ function addToRecentSearches(query) {
 }
 
 const CUSTOM_SHORTCUTS = {
-    '/c': { name: 'Claude', url: 'https://claude.ai', description: 'Search or start a new chat' },
+    '/c': { name: 'ChatGPT', url: 'https://chat.openai.com', description: 'Search or start a new chat' },
     '/y': { name: 'YouTube', url: 'https://youtube.com', description: 'Search for videos' },
     '/g': { name: 'GitHub', url: 'https://github.com', description: 'Search repositories' },
     '/m': { name: 'Gmail', url: 'https://mail.google.com', description: 'Search emails' },
@@ -205,7 +205,7 @@ async function getSuggestions(event) {
 function getIconForCommand(command) {
     const iconMap = {
         '/y': 'fa-brands fa-youtube',
-        '/c': 'fa-solid fa-brain',
+        '/c': 'fa-solid fa-robot',
         '/g': 'fa-brands fa-github',
         '/m': 'fa-solid fa-envelope',
         '/d': 'fa-brands fa-google-drive'
@@ -303,7 +303,7 @@ function handleSearch(input) {
                     window.location = `https://github.com/search?q=${encodeURIComponent(query)}`;
                     break;
                 case '/c':
-                    window.location = `https://claude.ai/chat?q=${encodeURIComponent(query)}`;
+                    window.location = `https://chat.openai.com/chat?q=${encodeURIComponent(query)}`;
                     break;
                 case '/m':
                     window.location = `https://mail.google.com/mail/u/0/#search/${encodeURIComponent(query)}`;
@@ -342,6 +342,9 @@ document.addEventListener('click', (event) => {
 
 // Color picker functionality
 function changeAccentColor(color, element) {
+    // Remove any existing theme classes
+    document.body.classList.remove('bw-theme');
+    
     // Update CSS custom properties
     document.documentElement.style.setProperty('--text-accent', color);
     
@@ -389,18 +392,77 @@ function changeAccentColor(color, element) {
     
     // Save preference to localStorage
     localStorage.setItem('accentColor', color);
+    localStorage.removeItem('theme'); // Clear theme preference when using color
+}
+
+// Black and white theme functionality
+function changeTheme(theme, element) {
+    if (theme === 'bw') {
+        // Apply black and white theme
+        document.body.classList.add('bw-theme');
+        
+        // Update particle colors to white
+        if (window.pJSDom && window.pJSDom[0]) {
+            const particles = window.pJSDom[0].pJS.particles;
+            particles.color.value = '#ffffff';
+            particles.line_linked.color = '#ffffff';
+            window.pJSDom[0].pJS.fn.particlesRefresh();
+        }
+        
+        // Update clock text color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = '#ffffff';
+        }
+        
+        // Update shortcut icons color
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.color = '#ffffff';
+        });
+        
+        // Update suggestion icons color
+        const suggestionIcons = document.querySelectorAll('.suggestion-icon');
+        suggestionIcons.forEach(icon => {
+            icon.style.color = '#ffffff';
+        });
+        
+        // Update suggestion categories background
+        const suggestionCategories = document.querySelectorAll('.suggestion-category');
+        suggestionCategories.forEach(category => {
+            category.style.background = '#ffffff';
+            category.style.color = '#000000';
+        });
+        
+        // Update active state
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        element.classList.add('active');
+        
+        // Save theme preference to localStorage
+        localStorage.setItem('theme', 'bw');
+        localStorage.removeItem('accentColor'); // Clear color preference when using theme
+    }
 }
 
 // Load saved color preference
 function loadSavedColor() {
+    const savedTheme = localStorage.getItem('theme');
     const savedColor = localStorage.getItem('accentColor');
-    if (savedColor) {
+    
+    if (savedTheme === 'bw') {
+        const themeOption = document.querySelector('[data-theme="bw"]');
+        if (themeOption) {
+            changeTheme('bw', themeOption);
+        }
+    } else if (savedColor) {
         const colorOption = document.querySelector(`[data-color="${savedColor}"]`);
         if (colorOption) {
             changeAccentColor(savedColor, colorOption);
         }
     } else {
-        // Set default to orange if no saved color
+        // Set default to orange if no saved color or theme
         const defaultColor = '#ff6b35';
         const defaultOption = document.querySelector(`[data-color="${defaultColor}"]`);
         if (defaultOption) {
@@ -411,29 +473,53 @@ function loadSavedColor() {
 
 // Initialize color on page load
 function initializeColor() {
+    const savedTheme = localStorage.getItem('theme');
     const savedColor = localStorage.getItem('accentColor') || '#ff6b35';
     
-    // Update CSS custom properties immediately
-    document.documentElement.style.setProperty('--text-accent', savedColor);
-    const glowColor = savedColor + '1a';
-    document.documentElement.style.setProperty('--glow-color', glowColor);
-    
-    // Update all elements that use the accent color
-    const clockElement = document.getElementById('clock');
-    if (clockElement) {
-        clockElement.style.color = savedColor;
-    }
-    
-    // Force update shortcut icons with inline styles
-    const shortcutIcons = document.querySelectorAll('.shortcut-icon');
-    shortcutIcons.forEach(icon => {
-        icon.style.setProperty('color', savedColor, 'important');
-    });
-    
-    // Set the active state in color picker
-    const colorOption = document.querySelector(`[data-color="${savedColor}"]`);
-    if (colorOption) {
-        colorOption.classList.add('active');
+    if (savedTheme === 'bw') {
+        // Apply black and white theme immediately
+        document.body.classList.add('bw-theme');
+        
+        // Update all elements that use the accent color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = '#ffffff';
+        }
+        
+        // Force update shortcut icons with inline styles
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.setProperty('color', '#ffffff', 'important');
+        });
+        
+        // Set the active state in color picker
+        const themeOption = document.querySelector('[data-theme="bw"]');
+        if (themeOption) {
+            themeOption.classList.add('active');
+        }
+    } else {
+        // Update CSS custom properties immediately
+        document.documentElement.style.setProperty('--text-accent', savedColor);
+        const glowColor = savedColor + '1a';
+        document.documentElement.style.setProperty('--glow-color', glowColor);
+        
+        // Update all elements that use the accent color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = savedColor;
+        }
+        
+        // Force update shortcut icons with inline styles
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.setProperty('color', savedColor, 'important');
+        });
+        
+        // Set the active state in color picker
+        const colorOption = document.querySelector(`[data-color="${savedColor}"]`);
+        if (colorOption) {
+            colorOption.classList.add('active');
+        }
     }
 }
 

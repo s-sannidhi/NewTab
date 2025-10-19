@@ -12,6 +12,19 @@
     --glow-color: rgba(255, 107, 53, 0.1);
 }
 
+/* Black and white theme - Dark background with white accents */
+body.bw-theme {
+    --bg-primary: #000000;
+    --bg-secondary: #111111;
+    --text-primary: #ffffff;
+    --text-secondary: #888888;
+    --text-accent: #ffffff;
+    --text-muted: #666666;
+    --border-color: #333333;
+    --hover-color: #1a1a1a;
+    --glow-color: rgba(255, 255, 255, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -394,6 +407,22 @@ body {
 .color-nord { background: #5e81ac; }
 .color-everforest { background: #a7c080; }
 .color-catppuccin { background: #d4a6d8; }
+.color-bw { 
+    background: #000000;
+    position: relative;
+    border: 2px solid #ffffff;
+}
+.color-bw::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: #ffffff;
+    border-radius: 50%;
+}
 
 /* Terminal-style cursor effect */
 .terminal-cursor {
