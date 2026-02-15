@@ -25,6 +25,19 @@ body.bw-theme {
     --glow-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Coffee theme - Warm espresso and cream tones */
+body.coffee-theme {
+    --bg-primary: #2a2420;
+    --bg-secondary: #3a3630;
+    --text-primary: #e8dcc4;
+    --text-secondary: #a89980;
+    --text-accent: #c9a878;
+    --text-muted: #8b7d6f;
+    --border-color: #5c5349;
+    --hover-color: #4a4238;
+    --glow-color: rgba(201, 168, 120, 0.1);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -421,6 +434,22 @@ body {
     width: 8px;
     height: 8px;
     background: #ffffff;
+    border-radius: 50%;
+}
+.color-coffee {
+    background: #c9a878;
+    position: relative;
+    border: 2px solid transparent;
+}
+.color-coffee::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: #2a2420;
     border-radius: 50%;
 }
 

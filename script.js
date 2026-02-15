@@ -344,6 +344,7 @@ document.addEventListener('click', (event) => {
 function changeAccentColor(color, element) {
     // Remove any existing theme classes
     document.body.classList.remove('bw-theme');
+    document.body.classList.remove('coffee-theme');
     
     // Update CSS custom properties
     document.documentElement.style.setProperty('--text-accent', color);
@@ -443,6 +444,53 @@ function changeTheme(theme, element) {
         // Save theme preference to localStorage
         localStorage.setItem('theme', 'bw');
         localStorage.removeItem('accentColor'); // Clear color preference when using theme
+    } else if (theme === 'coffee') {
+        // Apply coffee theme
+        document.body.classList.add('coffee-theme');
+        document.body.classList.remove('bw-theme');
+        
+        // Update particle colors to coffee accent
+        if (window.pJSDom && window.pJSDom[0]) {
+            const particles = window.pJSDom[0].pJS.particles;
+            particles.color.value = '#c9a878';
+            particles.line_linked.color = '#c9a878';
+            window.pJSDom[0].pJS.fn.particlesRefresh();
+        }
+        
+        // Update clock text color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = '#c9a878';
+        }
+        
+        // Update shortcut icons color
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.color = '#c9a878';
+        });
+        
+        // Update suggestion icons color
+        const suggestionIcons = document.querySelectorAll('.suggestion-icon');
+        suggestionIcons.forEach(icon => {
+            icon.style.color = '#c9a878';
+        });
+        
+        // Update suggestion categories background
+        const suggestionCategories = document.querySelectorAll('.suggestion-category');
+        suggestionCategories.forEach(category => {
+            category.style.background = '#c9a878';
+            category.style.color = '#2a2420';
+        });
+        
+        // Update active state
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        element.classList.add('active');
+        
+        // Save theme preference to localStorage
+        localStorage.setItem('theme', 'coffee');
+        localStorage.removeItem('accentColor'); // Clear color preference when using theme
     }
 }
 
@@ -455,6 +503,11 @@ function loadSavedColor() {
         const themeOption = document.querySelector('[data-theme="bw"]');
         if (themeOption) {
             changeTheme('bw', themeOption);
+        }
+    } else if (savedTheme === 'coffee') {
+        const themeOption = document.querySelector('[data-theme="coffee"]');
+        if (themeOption) {
+            changeTheme('coffee', themeOption);
         }
     } else if (savedColor) {
         const colorOption = document.querySelector(`[data-color="${savedColor}"]`);
@@ -494,6 +547,27 @@ function initializeColor() {
         
         // Set the active state in color picker
         const themeOption = document.querySelector('[data-theme="bw"]');
+        if (themeOption) {
+            themeOption.classList.add('active');
+        }
+    } else if (savedTheme === 'coffee') {
+        // Apply coffee theme immediately
+        document.body.classList.add('coffee-theme');
+        
+        // Update all elements that use the accent color
+        const clockElement = document.getElementById('clock');
+        if (clockElement) {
+            clockElement.style.color = '#c9a878';
+        }
+        
+        // Force update shortcut icons with inline styles
+        const shortcutIcons = document.querySelectorAll('.shortcut-icon');
+        shortcutIcons.forEach(icon => {
+            icon.style.setProperty('color', '#c9a878', 'important');
+        });
+        
+        // Set the active state in color picker
+        const themeOption = document.querySelector('[data-theme="coffee"]');
         if (themeOption) {
             themeOption.classList.add('active');
         }
